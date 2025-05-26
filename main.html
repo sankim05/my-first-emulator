@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Chip - 8 Emulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="" href="style.css">
+    <link rel="icon" href="https://media.contentapi.ea.com/content/dam/game-objects/plants-vs-zombies-2-game-objects/plants/akee.png.adapt.crop16x9.png">
+    <script src="script.js" defer></script>
+
+</head>
+
+<body>
+
+<h1>CHIP-8 에뮬레이터</h1>
+<hr>
+<div id = displayandrom>
+<div id="pausedtxt">현재 정지 중</div>
+<canvas id="Display" width="320" height="160"></canvas>
+
+<div id = "SPEEDSTER">
+<button type="button" class = "inliner" id = "Speeddown"> &lt; </button>
+<div class = "inliner" id = "Speedshow" >512hz</div>
+<button type="button" class = "inliner" id = "Speedup"> &gt; </button>
+(1hz ~ 4096hz)
+<button type="button" class = "inliner" id = "EmuRun"> 시작 </button>
+<button type="button" class = "inliner" id = "EmuPause"> 정지 </button>
+<button type="button" class = "inliner" id = "EmuStep"> 스텝 </button>
+<button type="button" class = "inliner" id = "EmuReset"> 리셋 </button>
+
+</div>
+<br>
+
+
+<div id = "ROMINPUT" >
+        <textarea id="romtextarea" placeholder="여기에 HEX 롬을 붙여넣으세요"></textarea>
+</div>
+</div>
+
+
+
+
+
+
+
+
+<div id = maincontrol>
+컨트롤 키패드(괄호 안에있는 키는 실제 키보드와 대응됩니다)
+<div class="keypadrow">
+<button type="button" class = "keypadbtn"> 1(1) </button>
+<button type="button" class = "keypadbtn"> 2(2) </button>
+<button type="button" class = "keypadbtn"> 3(3) </button>
+<button type="button" class = "keypadbtn"> C(4) </button>
+</div>
+<div class="keypadrow">
+<button type="button" class = "keypadbtn"> 4(Q) </button>
+<button type="button" class = "keypadbtn"> 5(W) </button>
+<button type="button" class = "keypadbtn"> 6(E) </button>
+<button type="button" class = "keypadbtn"> D(R) </button>
+</div>
+<div class="keypadrow">
+<button type="button" class = "keypadbtn"> 7(A) </button>
+<button type="button" class = "keypadbtn"> 8(S) </button>
+<button type="button" class = "keypadbtn"> 9(D) </button>
+<button type="button" class = "keypadbtn"> E(F) </button>
+</div>
+<div class="keypadrow">
+<button type="button" class = "keypadbtn"> A(Z) </button>
+<button type="button" class = "keypadbtn"> 0(X) </button>
+<button type="button" class = "keypadbtn"> B(C) </button>
+<button type="button" class = "keypadbtn"> F(V) </button>
+</div>        
+</div>
+
+
+
+</div>
+
+
+</body>
+
+
+</html>

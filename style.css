@@ -1,0 +1,32 @@
+  #romtextarea {
+    width: 320px;
+    height: 200px;
+    
+    resize: none;
+  }
+
+
+   .inliner {
+  
+    display: inline;
+   
+  }
+   .keypadbtn {
+    width: 28px;
+    height: 28px;
+     
+    text-align: center;   
+     display: inline-flex;
+    align-items: center;     
+    justify-content: center;
+    font-size: smaller;
+  }
+ 
+
+ 
+  #maincontrol {
+    float: left;
+  }  
+  #displayandrom {
+    float: left;
+  } 
