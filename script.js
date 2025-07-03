@@ -23,16 +23,33 @@ let REGI_I = 0;
 let STACK = [];
 let TIMER_DELAY = 0;
 let TIMER_SOUND = 0;
+let running = false;
+let hz = 512;
 
+var canvas = document.getElementById("Display");
+if (canvas.getContext) {
+var ctx = canvas.getContext("2d"); 
+ctx.fillStyle = "rgb(0,0,0)";
+ctx.fillRect(0, 0, 320, 160);
+}
+
+function loadRom(){
+
+}
 
 function emureset(){
-    var canvas = document.getElementById("Display");
-    if (canvas.getContext) {
-    var ctx = canvas.getContext("2d"); 
-    ctx.fillStyle = "rgb(0,0,0)";
+    console.log("RESET");
+    running = false;
+    document.getElementById("pausedtxt").textContent = "현재 정지 중"; 
     ctx.fillRect(0, 0, 320, 160);
- }
+    loadRom();
 }
+
+
+function clockstep(){
+
+}
+
 
 emureset();
 
@@ -40,4 +57,23 @@ emureset();
 
 
 
-
+document.getElementById("EmuStep").addEventListener("click",clockstep);
+document.getElementById("EmuReset").addEventListener("click",emureset);
+document.getElementById("EmuRun").addEventListener("click",function(){
+    running = true
+    document.getElementById("pausedtxt").textContent = "현재 실행 중";
+});
+document.getElementById("EmuPause").addEventListener("click",function(){
+    running = false
+    document.getElementById("pausedtxt").textContent = "현재 정지 중"; 
+});
+document.getElementById("Speeddown").addEventListener("click",function(){
+    
+    if(hz>1)hz = hz/2;
+    document.getElementById("Speedshow").textContent = hz + "hz";
+});
+document.getElementById("Speedup").addEventListener("click",function(){
+    
+    if(hz<4096)hz = hz*2;
+    document.getElementById("Speedshow").textContent = hz + "hz";
+});

@@ -10,6 +10,7 @@
     <link rel="icon" href="https://media.contentapi.ea.com/content/dam/game-objects/plants-vs-zombies-2-game-objects/plants/akee.png.adapt.crop16x9.png">
     <script src="script.js" defer></script>
 
+    
 </head>
 
 <body>
@@ -37,10 +38,12 @@
 <div id = "ROMINPUT" >
         <textarea id="romtextarea" placeholder="여기에 HEX 롬을 붙여넣으세요"></textarea>
 </div>
+
+<div id = "CurrentACT">현재 실행 중인 행동:??</div>
+
+
+
 </div>
-
-
-
 
 
 
@@ -71,10 +74,65 @@
 <button type="button" class = "keypadbtn"> 0(X) </button>
 <button type="button" class = "keypadbtn"> B(C) </button>
 <button type="button" class = "keypadbtn"> F(V) </button>
-</div>        
 </div>
 
 
+
+<br>
+
+<span class="showinside" id="RAMSHOW">
+    <div>RAM|주소</div>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+  
+    <span id="PCPOINTER">실행-></span><span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+</span>
+<span class="showinside" id = "REGISHOW">
+    <span class="regiin">레지스터<br>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V0</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V1</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V2</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V3</span><br>
+  
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V4</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V5</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V6</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V7</span><br>    
+</span>
+<span class="regiin"><br>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V8</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V9</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VA</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VB</span><br>
+  
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VC</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VD</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VE</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VF</span><br>    
+</span>
+ 
+</span>
+<span class="showinside" id="EXTRASHOW">
+    
+    <span class="Bytebox">0000</span><span class="Bytebox2"id="IRSHOW">IR</span><br>
+    <span class="Bytebox">000</span><span class="Bytebox2"id="PCSHOW">PC</span><br>
+    
+    <span class="Bytebox">00</span><span class="Bytebox2"id="DESHOW">DELAY</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2"id="SOSHOW">SOUND</span><br>
+  
+
+</span>
+</div>
 
 </div>
 
