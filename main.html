@@ -39,7 +39,7 @@
         <textarea id="romtextarea" placeholder="여기에 HEX 롬을 붙여넣으세요"></textarea>
 </div>
 
-<div id = "CurrentACT">현재 실행 중인 행동:??</div>
+<span>현재 실행 중인 행동:</span><div id = "CurrentACT">??</div>
 
 
 
@@ -88,7 +88,7 @@
     <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
     <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
   
-    <span id="PCPOINTER">실행-></span><span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span id="PCPOINTER">PC-></span><span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
 
     <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
     <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
@@ -124,11 +124,11 @@
 </span>
 <span class="showinside" id="EXTRASHOW">
     
-    <span class="Bytebox">0000</span><span class="Bytebox2"id="IRSHOW">IR</span><br>
-    <span class="Bytebox">000</span><span class="Bytebox2"id="PCSHOW">PC</span><br>
+    <span class="Bytebox"id="IRSHOWcontent">0000</span><span class="Bytebox2"id="IRSHOW">IR</span><br>
+    <span class="Bytebox"id="PCSHOWcontent">000</span><span class="Bytebox2"id="PCSHOW">PC</span><br>
     
-    <span class="Bytebox">00</span><span class="Bytebox2"id="DESHOW">DELAY</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2"id="SOSHOW">SOUND</span><br>
+    <span class="Bytebox"id="DESHOWcontent">00</span><span class="Bytebox2"id="DESHOW">DELAY</span><br>
+    <span class="Bytebox"id="SOSHOWcontent">00</span><span class="Bytebox2"id="SOSHOW">SOUND</span><br>
   
 
 </span>
