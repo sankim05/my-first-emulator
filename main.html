@@ -20,7 +20,8 @@
 <div id = displayandrom>
 <div id="pausedtxt">현재 정지 중</div>
 <canvas id="Display" width="320" height="160"></canvas>
-
+    <input type="checkbox" id="super" name="super" />
+    <label for="super">SUPER-CHIP</label>
 <div id = "SPEEDSTER">
 <button type="button" class = "inliner" id = "Speeddown"> &lt; </button>
 <div class = "inliner" id = "Speedshow" >512hz</div>
@@ -52,28 +53,28 @@
 <div id = maincontrol>
 컨트롤 키패드(괄호 안에있는 키는 실제 키보드와 대응됩니다)
 <div class="keypadrow">
-<button type="button" class = "keypadbtn"> 1(1) </button>
-<button type="button" class = "keypadbtn"> 2(2) </button>
-<button type="button" class = "keypadbtn"> 3(3) </button>
-<button type="button" class = "keypadbtn"> C(4) </button>
+<button type="button" class = "keypadbtn" data-hex="1"> 1(1) </button>
+<button type="button" class = "keypadbtn" data-hex="2"> 2(2) </button>
+<button type="button" class = "keypadbtn" data-hex="3"> 3(3) </button>
+<button type="button" class = "keypadbtn" data-hex="C"> C(4) </button>
 </div>
 <div class="keypadrow">
-<button type="button" class = "keypadbtn"> 4(Q) </button>
-<button type="button" class = "keypadbtn"> 5(W) </button>
-<button type="button" class = "keypadbtn"> 6(E) </button>
-<button type="button" class = "keypadbtn"> D(R) </button>
+<button type="button" class = "keypadbtn" data-hex="4"> 4(Q) </button>
+<button type="button" class = "keypadbtn" data-hex="5"> 5(W) </button>
+<button type="button" class = "keypadbtn" data-hex="6"> 6(E) </button>
+<button type="button" class = "keypadbtn" data-hex="D"> D(R) </button>
 </div>
 <div class="keypadrow">
-<button type="button" class = "keypadbtn"> 7(A) </button>
-<button type="button" class = "keypadbtn"> 8(S) </button>
-<button type="button" class = "keypadbtn"> 9(D) </button>
-<button type="button" class = "keypadbtn"> E(F) </button>
+<button type="button" class = "keypadbtn" data-hex="7"> 7(A) </button>
+<button type="button" class = "keypadbtn" data-hex="8"> 8(S) </button>
+<button type="button" class = "keypadbtn" data-hex="9"> 9(D) </button>
+<button type="button" class = "keypadbtn" data-hex="E"> E(F) </button>
 </div>
 <div class="keypadrow">
-<button type="button" class = "keypadbtn"> A(Z) </button>
-<button type="button" class = "keypadbtn"> 0(X) </button>
-<button type="button" class = "keypadbtn"> B(C) </button>
-<button type="button" class = "keypadbtn"> F(V) </button>
+<button type="button" class = "keypadbtn" data-hex="A"> A(Z) </button>
+<button type="button" class = "keypadbtn" data-hex="0"> 0(X) </button>
+<button type="button" class = "keypadbtn" data-hex="B"> B(C) </button>
+<button type="button" class = "keypadbtn" data-hex="F"> F(V) </button>
 </div>
 
 
