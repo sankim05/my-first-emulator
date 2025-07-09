@@ -71,6 +71,7 @@
   }
   .regiin{
     display: inline-block;
+  
   }
   #displayandrom {
     float: left;
@@ -98,7 +99,15 @@
     
     background-color: red;
 
-  }       
+  }     
+  #fREGISHOW{
+    
+    display: none;
+
+  }
   .REGIS{
     background-color:deepskyblue;
+  }
+  .fREGIS{
+    background-color: darkseagreen;
   }

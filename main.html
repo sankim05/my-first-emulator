@@ -15,13 +15,19 @@
 
 <body>
 
-<h1>CHIP-8 에뮬레이터</h1>
+<h1>CHIP-8(과 SUPER-CHIP과 XO-CHIP) 에뮬레이터</h1>
 <hr>
 <div id = displayandrom>
 <div id="pausedtxt">현재 정지 중</div>
-<canvas id="Display" width="320" height="160"></canvas>
+<canvas id="Display" width="384" height="192"></canvas>
+<span style="display: block;">
     <input type="checkbox" id="super" name="super" />
     <label for="super">SUPER-CHIP</label>
+    
+    <input type="checkbox" id="xo" name="xo" />
+    <label for="xo">XO-CHIP</label>        
+</span>
+
 <div id = "SPEEDSTER">
 <button type="button" class = "inliner" id = "Speeddown"> &lt; </button>
 <div class = "inliner" id = "Speedshow" >512hz</div>
@@ -96,6 +102,32 @@
     <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
     <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
 </span>
+ <span class="showinside" id = "fREGISHOW">
+    <span class="regiin">플래그 레지스터<br>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V0</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V1</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V2</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V3</span><br>
+  
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V4</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V5</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V6</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V7</span><br>    
+</span>
+<span class="regiin"><br>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V8</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">V9</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VA</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VB</span><br>
+  
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VC</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VD</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VE</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VF</span><br>    
+</span>
+</span>
 <span class="showinside" id = "REGISHOW">
     <span class="regiin">레지스터<br>
    
@@ -121,8 +153,7 @@
     <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VE</span><br>
     <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VF</span><br>    
 </span>
- 
-</span>
+
 <span class="showinside" id="EXTRASHOW">
     
     <span class="Bytebox"id="IRSHOWcontent">0000</span><span class="Bytebox2"id="IRSHOW">IR</span><br>

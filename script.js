@@ -1,5 +1,6 @@
 const RAM = new Uint8Array(4096);
 const REGISTERS = new Uint8Array(16);
+const FREGISTERS = new Uint8Array(16);
 const FONTS = [
 0x60, 0x90, 0x90, 0x90, 0x60, //0
 0x20, 0x60, 0xA0, 0x20, 0xF0, //1
@@ -18,6 +19,24 @@ const FONTS = [
 0xE0, 0x80, 0xF0, 0x80, 0xE0, //E
 0xE0, 0x80, 0xF0, 0x80, 0x80  //F
 ];
+const FONTSHIGHRES = [
+0x00, 0x3C, 0x42, 0x46, 0x4A, 0x52, 0x62, 0x42, 0x3C, 0x00, //0
+0x00, 0x08, 0x18, 0x28, 0x08, 0x08, 0x08, 0x08, 0x3E, 0x00, //1
+0x00, 0x3C, 0x42, 0x02, 0x02, 0x0C, 0x30, 0x40, 0x7E, 0x00, //2
+0x00, 0x3C, 0x42, 0x02, 0x02, 0x3C, 0x02, 0x42, 0x3C, 0x00, //3
+0x00, 0x00, 0x80, 0x18, 0x28, 0x48, 0x7E, 0x08, 0x08, 0x00, //4
+0x00, 0x7E, 0x80, 0x80, 0x7C, 0x02, 0x02, 0x02, 0x7C, 0x00, //5
+0x00, 0x1C, 0x20, 0x40, 0x7C, 0x82, 0x82, 0x82, 0x3C, 0x00, //6
+0x00, 0x7C, 0x02, 0x04, 0x04, 0x08, 0x08, 0x10, 0x10, 0x00, //7
+0x00, 0x3C, 0x42, 0x42, 0x3C, 0x42, 0x42, 0x42, 0x3C, 0x00, //8
+0x00, 0x3C, 0x42, 0x42, 0x3E, 0x02, 0x02, 0x02, 0x3C, 0x00, //9
+0x00, 0x18, 0x24, 0x42, 0x42, 0x7E, 0x42, 0x42, 0x42, 0x00, //A
+0x00, 0x7C, 0x42, 0x42, 0x42, 0x7C, 0x42, 0x42, 0x7C, 0x00, //B
+0x00, 0x3C, 0x42, 0x40, 0x40, 0x40, 0x40, 0x42, 0x3C, 0x00, //C
+0x00, 0x7C, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x7C, 0x00, //D
+0x00, 0x7E, 0x40, 0x40, 0x7E, 0x40, 0x40, 0x40, 0x7E, 0x00, //E
+0x00, 0x7E, 0x40, 0x40, 0x7E, 0x40, 0x40, 0x40, 0x40, 0x00  //F
+];
 let PC = 0x200;
 let REGI_I = 0;
 let STACK = [];
@@ -27,9 +46,12 @@ let running = false;
 let hz = 512;
 let secretregidx; 
 let issuper = false;
+let isxo = false;
+let hires = false;
 const byteboxes = document.querySelectorAll("#RAMSHOW .Bytebox");
 const bytebox2s = document.querySelectorAll("#RAMSHOW .Bytebox2");
 const rbyteboxes = document.querySelectorAll("#REGISHOW .Bytebox");
+const rfbyteboxes = document.querySelectorAll("#fREGISHOW .Bytebox");
 const buttons = document.getElementsByClassName("keypadbtn");
 let lastTime = 0;    // 마지막 루프가 돌았던 시각 (ms)
 let accTime  = 0;    // 남은 누적 시간(ms)
@@ -42,9 +64,10 @@ var canvas = document.getElementById("Display");
 if (canvas.getContext) {
 var ctx = canvas.getContext("2d"); 
 ctx.fillStyle = "rgb(0,0,0)";
-ctx.fillRect(0, 0, 320, 160);
+ctx.fillRect(0, 0, 384, 192);
 }
-const screen = new BigInt64Array(32) //64x32,x는 비트형태로 저장
+
+const screen = new BigInt64Array(128) //128x64,y는 비트형태로 저장
 
 
 function updatesoundstate(){
@@ -62,16 +85,16 @@ function updatesoundstate(){
 function clearscreen(){
     
     ctx.fillStyle = "rgb(0,0,0)";
-    ctx.fillRect(0, 0, 320, 160);
+    ctx.fillRect(0, 0, 384, 192);
 }
 function renderscreen(){
     clearscreen();
     ctx.fillStyle = "rgb(255,255,255)";
-    for(let i=0;i<32;i++){
+    for(let i=0;i<128;i++){
    
         for(let j=0;j<64;j++){
             if(screen[i] & (1n<<BigInt(j))){
-                ctx.fillRect((63-j)*5, i*5, 5, 5);
+                ctx.fillRect(i*3, j*3, 3, 3);
     
 
             }
@@ -108,7 +131,18 @@ function showregi(){
     }
 }
 
+function showfregi(){
+    for(let i=0;i<16;i++){
+        
+
+        rfbyteboxes[i].textContent = FREGISTERS[i].toString(16).padStart(2, "0").toUpperCase();
+     
+
+    }
+}
+
 function clockstep(){
+    
     let I1 = RAM[PC]>>4;
     let I2 = RAM[PC]&0xF;
     let I3 = RAM[PC+1]>>4;
@@ -121,13 +155,20 @@ function clockstep(){
  
     switch(I1){
         case 0:
-            if(I3===0xE){
+            if(I2===0){
+            if(I3===0xC){
+                if(hires)for(let i=0;i<128;i++)screen[i] = screen[i] << BigInt(I4);
+                else for(let i=0;i<128;i++)screen[i] = screen[i] << BigInt(I4*2);
+                renderscreen();
+                document.getElementById("CurrentACT").textContent = "아래로  " + I4 + "픽셀 스크롤";
+            }
+            else if(I3===0xE){
 
 
 
             
             if(I4===0){
-                for(let i=0;i<32;i++) screen[i] = 0n;
+                for(let i=0;i<128;i++) screen[i] = 0n;
                 clearscreen();
                 document.getElementById("CurrentACT").textContent = "화면 지우기";
 
@@ -137,7 +178,68 @@ function clockstep(){
                 document.getElementById("CurrentACT").textContent = "PC = " + PC.toString(16).toUpperCase() + "로 서브루틴 복귀";
               
             }
+            }else if(I3===0xF){
+                switch(I4){
+
+                      case 0xB:
+                        if(hires){
+                        for(let i=127;i>=4;i--) screen[i] = screen[i-4];
+                        for(let i=3;i>=0;i--) screen[i] = 0n;  
+
+                        }else{
+
+
+                        for(let i=127;i>=8;i--) screen[i] = screen[i-8];
+                        for(let i=7;i>=0;i--) screen[i] = 0n;  
+
+                        }
+                    
+                        document.getElementById("CurrentACT").textContent = "오른쪽으로 4픽셀 스크롤";
+
+                        break;
+                      case 0xC:
+                        if(hires){
+                        for(let i=0;i<124;i++) screen[i] = screen[i+4];
+                        for(let i=124;i<128;i++) screen[i] = 0n;
+                        }else{
+                        for(let i=0;i<120;i++) screen[i] = screen[i+8];
+                        for(let i=120;i<128;i++) screen[i] = 0n;
+
+                            
+                        }
+                        document.getElementById("CurrentACT").textContent = "왼쪽으로 4픽셀 스크롤";
+
+                        break;
+                       case 0xD:
+                        running = false;
+                        document.getElementById("pausedtxt").textContent = "현재 정지 중";
+                        document.getElementById("CurrentACT").textContent = "프로그램 탈출";
+
+                        break;                                                                          
+                     case 0xE:
+                        hires = false;
+                        document.getElementById("CurrentACT").textContent = "저화질 그래픽 활성화";
+
+                        break;                   
+                    case 0xF:
+                        hires = true;
+                        document.getElementById("CurrentACT").textContent = "고화질 그래픽 활성화";
+
+                        break;
+
+
+
+
+
+                }
+
+
+
             }
+
+
+            }
+
 
             break;
 
@@ -201,14 +303,17 @@ function clockstep(){
 
                 case 1:
                     REGISTERS[I2] = REGISTERS[I2] | REGISTERS[I3];
+                    if(!issuper) REGISTERS[0xF] = 0;
                     document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " OR V" + I3.toString(16).toUpperCase();
                     break;
                 case 2:
                     REGISTERS[I2] = REGISTERS[I2] & REGISTERS[I3];
+                    if(!issuper) REGISTERS[0xF] = 0;
                     document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " AND V" + I3.toString(16).toUpperCase();
                     break;
                 case 3:
                     REGISTERS[I2] = REGISTERS[I2] ^ REGISTERS[I3];
+                    if(!issuper) REGISTERS[0xF] = 0;
                     document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " XOR V" + I3.toString(16).toUpperCase();
                     break;
                 case 4:
@@ -228,9 +333,9 @@ function clockstep(){
  
                 case 6:
                     if(!issuper) REGISTERS[I2] = REGISTERS[I3];
-                    
-                    REGISTERS[I2] = REGISTERS[I2] >> 1;
                     REGISTERS[0xF] = REGISTERS[I2]&1;
+                    REGISTERS[I2] = REGISTERS[I2] >> 1;
+                    
                     
                     
                     if(!issuper) document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " >> 1";
@@ -248,9 +353,9 @@ function clockstep(){
                 case 0xE:
                     
                     if(!issuper) REGISTERS[I2] = REGISTERS[I3];
-                    
-                    REGISTERS[I2] = REGISTERS[I2] << 1;
                     REGISTERS[0xF] = Math.floor(REGISTERS[I2]/0x100);
+                    REGISTERS[I2] = REGISTERS[I2] << 1;
+                    
                     
                     
                     if(!issuper) document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " << 1";
@@ -293,33 +398,142 @@ function clockstep(){
             break;
 
         case 0xD:
-            let x = REGISTERS[I2]&63;
-            let y = REGISTERS[I3]&31;
+            let x,y;
+            
+x = REGISTERS[I2];
+y = REGISTERS[I3];
+            if(hires){
+            x = x%128;
+            y = y%64;
+            }else{
+     
+            x = x%64;
+            y = y%32;
+
+            
+            
+            
+            }
+
             REGISTERS[0xF] = 0;
-            for(let i=0;i<I4;i++){
+            if(I4===0&&issuper) I4=16;
+
+            if(hires){
+            if(I4==16){
+
+            for(let i=0;i<32;i+=2){
                 let bytegot = RAM[REGI_I+i];
+                let bytegot2 = RAM[REGI_I+i+1];
+                let checker = false;
+                let ny = y+i/2;
                 for(let c=7;c>=0;c--){
                     if(bytegot&(1<<c)){
                         let nx = x+7-c;
-                        let ny = y+i;
-                        if(nx<64&&ny<32){
-                            if(screen[ny]&(1n<<BigInt(63-nx))){
-                                REGISTERS[0xF] = 1;
-
-                            }
-                            screen[ny] = screen[ny]^(1n<<BigInt(63-nx));
+                      
+                        if(nx<128&&ny<64){
+                            if(screen[nx]&(1n<<BigInt(ny)))checker = true;
+                            screen[nx] = screen[nx]^(1n<<BigInt(ny));                      
                         }
+                        if(ny>=64&&bytegot)checker = true;
                         
 
-                    }
+         
+                }
+                  if(bytegot2&(1<<c)){
+                        let nx = x+15-c;
+                        
+                        if(nx<128&&ny<64){
+                            if(screen[nx]&(1n<<BigInt(ny)))checker = true;
+                            screen[nx] = screen[nx]^(1n<<BigInt(ny));                      
+                        }
+                        if(ny>=64&&bytegot2)checker = true;
+                        
 
+         
+                }
+            }   
+if(checker) REGISTERS[0xF]++;
+
+        }
+            }else{
+
+           
+            for(let i=0;i<I4;i++){
+                let bytegot = RAM[REGI_I+i];
+                let checker = false;
+                  let ny = y+i;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = x+7-c;
+                       
+                        if(nx<128&&ny<64){
+                            if(screen[nx]&(1n<<BigInt(ny)))checker = true;
+                            screen[nx] = screen[nx]^(1n<<BigInt(ny));                      
+                        }
+                        if(ny>=64&&bytegot)checker = true;
+                        
+
+         
+                }
+
+                if(checker) REGISTERS[0xF]++;
+            }    
+            }                
+
+ }
+            }else{
+          
+            for(let i=0;i<I4;i++){
+                let bytegot = RAM[REGI_I+i];
+                let ny = (y+i);
+                if(ny>=32) break;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = (x+7-c);
+                       
+
+
+                
+                        if(nx>=64) break;
+                        
+                            
+                            let fx = nx*2;
+                            let fy = ny*2;
+                            for(let dx = 0;dx<2;dx++){
+                                for(let dy=0;dy<2;dy++){
+
+                            if(screen[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
+                            screen[fx+dx] = screen[fx+dx]^(1n<<BigInt(fy+dy));    
+                            
+
+                                }
+                            }
+
+
+                            
+             
+                        
+                        
+
+         
                 }
                 
             }    
 
 
+
+
+            }
+
+            }
+
+
+
+
+
             renderscreen();
-            document.getElementById("CurrentACT").textContent = "X : " + x + " Y : " + y +" 위치에 인덱스 레지스터 스프라이트 그리기 N : "+ I4;
+            if(hires&&I4===16) document.getElementById("CurrentACT").textContent = "X : " + x + " Y : " + y +" 위치에 고급 스프라이트 그리기";
+            else document.getElementById("CurrentACT").textContent = "X : " + x + " Y : " + y +" 위치에 인덱스 레지스터 스프라이트 그리기 N : "+ I4;
              showregi();
 
             break;
@@ -381,6 +595,15 @@ function clockstep(){
 
 
                     break;
+                case 0x30:
+                    REGI_I = 0x100 + (REGISTERS[I2]&0xF)*10;
+                
+                    
+                    document.getElementById("CurrentACT").textContent = "인덱스 레지스터 = " + (REGISTERS[I2]&0xF).toString(16).toUpperCase() + " 폰트(대형) 주소";
+                    
+
+
+                    break;                    
                 case 0x33:
                     RAM[REGI_I] = (REGISTERS[I2]/100);
                     RAM[REGI_I+1] = ((REGISTERS[I2]/10)%10);
@@ -396,9 +619,10 @@ function clockstep(){
                     for(let i = 0;i<=I2;i++){
                         RAM[REGI_I] = REGISTERS[i];
                         REGI_I++;
-                        if(REGI_I>0xFFFF) REGI_I = 0;
+                        if(!issuper&&REGI_I>0xFFFF) REGI_I = 0;
                     }
                     if(issuper)REGI_I-=(I2+1);
+                    
                     
                     document.getElementById("CurrentACT").textContent = "램에 레지스터 V" + I2.toString(16).toUpperCase() + "까지 저장";
                     
@@ -410,7 +634,7 @@ function clockstep(){
                     for(let i = 0;i<=I2;i++){
                         REGISTERS[i] = RAM[REGI_I];
                         REGI_I++;
-                        if(REGI_I>0xFFFF) REGI_I = 0;
+                        if(!issuper&&REGI_I>0xFFFF) REGI_I = 0;
                     }
                     if(issuper)REGI_I-=(I2+1);
                     
@@ -418,7 +642,36 @@ function clockstep(){
                      showregi();
 
 
-                    break;                                                                                                  
+                    break;
+                case 0x75:
+
+                    for(let i = 0;i<=I2;i++){
+                        FREGISTERS[i] = RAM[REGI_I+i];
+                       
+                       
+                    }
+                    
+                    document.getElementById("CurrentACT").textContent = "플래그 레지스터 V" + I2.toString(16).toUpperCase() + "까지 램 저장";
+                     showfregi();
+
+
+                    break;                     
+                case 0x85:
+
+                    for(let i = 0;i<=I2;i++){
+                        RAM[REGI_I+i] = FREGISTERS[i];
+                        
+                       
+                    }
+                    
+                    
+                    document.getElementById("CurrentACT").textContent = "램에 플래그 레지스터 V" + I2.toString(16).toUpperCase() + "까지 저장";
+                    showfregi();
+
+
+                    break;
+                      
+
             }
             break;
         default:
@@ -484,19 +737,24 @@ function loadRom(){
     for(let i=0;i<FONTS.length;i++){
         RAM[i+0x50] = FONTS[i];
     }
+    for(let i=0;i<FONTSHIGHRES.length;i++){
+        RAM[i+0x100] = FONTSHIGHRES[i];
+    }    
     showram();
 }
 
 function emureset(){
+    
     running = false;
     lastTime = 0;
     accTime  = 0; 
     accTimer = 0;
-    for(let i=0;i<32;i++) screen[i] = 0n;
+    for(let i=0;i<128;i++) screen[i] = 0n;
     paused = false;
-
+    hires = false;
     for(let i=0;i<4096;i++) RAM[i]=0;
     for(let i=0;i<16;i++) REGISTERS[i]=0;
+    for(let i=0;i<16;i++) FREGISTERS[i]=0;
     PC = 0x200;
     REGI_I = 0;
     STACK = [];
@@ -508,6 +766,7 @@ function emureset(){
     document.getElementById("CurrentACT").textContent = "??";
     showram();
     showregi();
+    showfregi();
     document.getElementById("SOSHOWcontent").textContent = TIMER_SOUND.toString(16).padStart(2, "0").toUpperCase();
 
     document.getElementById("DESHOWcontent").textContent = TIMER_DELAY.toString(16).padStart(2, "0").toUpperCase();
@@ -535,7 +794,7 @@ document.getElementById("EmuRun").addEventListener("click",function(){
     if(running) return;
     audio.play();
     audio.pause();
-    running = true
+    running = true;
     document.getElementById("pausedtxt").textContent = "현재 실행 중";
        lastTime = 0;
   accTime  = 0;
@@ -544,7 +803,7 @@ document.getElementById("EmuRun").addEventListener("click",function(){
     
 });
 document.getElementById("EmuPause").addEventListener("click",function(){
-    running = false
+    running = false;
     document.getElementById("pausedtxt").textContent = "현재 정지 중";
     
 });
@@ -564,7 +823,18 @@ document.getElementById("super").addEventListener ("click",function(newvalue){
 
 
     issuper = newvalue.target.checked;
-   
+   if(issuper)document.getElementById("fREGISHOW").style.display = 'inline-block';
+        
+   else document.getElementById("fREGISHOW").style.display = 'none';
+
+});
+document.getElementById("xo").addEventListener ("click",function(newvalue){
+
+
+    isxo = newvalue.target.checked;
+    if(isxo) issuper = true;
+    if(issuper)document.getElementById("fREGISHOW").style.display = 'inline-block';
+    
 
 });
 document.getElementById("romtextarea").addEventListener("input",loadRom);
