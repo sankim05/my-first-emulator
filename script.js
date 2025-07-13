@@ -80,7 +80,7 @@ const waveform = new Uint8Array(16).fill(0);
 const audioContext = new AudioContext();
 let nodge = null;
 async function gee() {
-    await audioContext.audioWorklet.addModule('.audioprocess.js');
+    await audioContext.audioWorklet.addModule('./audioprocess.js');
  nodeg = new AudioWorkletNode(audioContext, 'xoaudioProcessor', {
   numberOfOutputs: 1,
   outputChannelCount: [1],
