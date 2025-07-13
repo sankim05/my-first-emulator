@@ -77,9 +77,10 @@ let colorarr = ["rgb(0,0,0)","rgb(255,255,255)","rgb(255,0,255)","rgb(0,255,255)
 let textsel = "??";
 
 const waveform = new Uint8Array(16).fill(0);
-const audioContext = new AudioContext();
+let audioContext = null;
 let nodge = null;
 async function gee() {
+    audioContext = new AudioContext();
     await audioContext.audioWorklet.addModule('./audioprocess.js');
  nodeg = new AudioWorkletNode(audioContext, 'xoaudioProcessor', {
   numberOfOutputs: 1,
@@ -1170,7 +1171,8 @@ clockstep();
 
 });
 document.getElementById("EmuReset").addEventListener("click",emureset);
-document.getElementById("EmuRun").addEventListener("click",function(){
+document.getElementById("EmuRun").addEventListener("click",async function(){
+    if(audioContext == null) await gee();
     if(running) return;
     audio.play();
     audio.pause();
