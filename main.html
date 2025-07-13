@@ -7,7 +7,7 @@
     <title>Chip - 8 Emulator</title>
     <link rel="stylesheet" href="style.css">
     <link rel="" href="style.css">
-    <link rel="icon" href="https://media.contentapi.ea.com/content/dam/game-objects/plants-vs-zombies-2-game-objects/plants/akee.png.adapt.crop16x9.png">
+    <link rel="icon" href="https://plantsvszombies.wiki.gg/images/8/8c/Green_HD.png?837b41">
     <script src="script.js" defer></script>
 
     
@@ -32,7 +32,7 @@
 <button type="button" class = "inliner" id = "Speeddown"> &lt; </button>
 <div class = "inliner" id = "Speedshow" >512hz</div>
 <button type="button" class = "inliner" id = "Speedup"> &gt; </button>
-(1hz ~ 4096hz)
+(1hz ~ 4Mhz)
 <button type="button" class = "inliner" id = "EmuRun"> 시작 </button>
 <button type="button" class = "inliner" id = "EmuPause"> 정지 </button>
 <button type="button" class = "inliner" id = "EmuStep"> 스텝 </button>
@@ -86,21 +86,59 @@
 
 
 <br>
-
+<div id = "supershow">
 <span class="showinside" id="RAMSHOW">
     <div>RAM|주소</div>
    
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
   
-    <span id="PCPOINTER">PC-></span><span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span id="PCPOINTER">PC-></span><span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
 
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2">000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2">0000</span><br>
+</span>
+
+<span class="showinside" id = "REGISHOW">
+    <span class="regiin">레지스터<br>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V0</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V1</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V2</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V3</span><br>
+  
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V4</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V5</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V6</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V7</span><br>    
+</span>
+<span class="regiin"><br>
+   
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V8</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V9</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VA</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VB</span><br>
+  
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VC</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VD</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VE</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VF</span><br>    
+</span>
+</span>
+<span class="showinside" id="EXTRASHOW">
+    
+    <span class="Bytebox"id="IRSHOWcontent">0000</span><span class="Bytebox2"id="IRSHOW">IR</span><br>
+    <span class="Bytebox"id="PCSHOWcontent">0000</span><span class="Bytebox2"id="PCSHOW">PC</span><br>
+    
+    <span class="Bytebox"id="DESHOWcontent">00</span><span class="Bytebox2"id="DESHOW">DELAY</span><br>
+    <span class="Bytebox"id="SOSHOWcontent">00</span><span class="Bytebox2"id="SOSHOW">SOUND</span><br>
+    <span class="Bytebox"id="PLSHOWcontent">00</span><span class="Bytebox2"id="PLSHOW">PLANE</span><br>
+    <span class="Bytebox"id="PTSHOWcontent">00</span><span class="Bytebox2"id="PTSHOW">PITCH</span><br>  
+
 </span>
  <span class="showinside" id = "fREGISHOW">
     <span class="regiin">플래그 레지스터<br>
@@ -128,45 +166,63 @@
     <span class="Bytebox">00</span><span class="Bytebox2 fREGIS">VF</span><br>    
 </span>
 </span>
-<span class="showinside" id = "REGISHOW">
-    <span class="regiin">레지스터<br>
+ <span class="showinside" id = "AREGISHOW">
+    <span class="regiin">오디오 패턴 버퍼<br>
    
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V0</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V1</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V2</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V3</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V0</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V1</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V2</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V3</span><br>
   
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V4</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V5</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V6</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V7</span><br>    
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V4</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V5</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V6</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V7</span><br>    
 </span>
 <span class="regiin"><br>
    
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V8</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">V9</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VA</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VB</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V8</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">V9</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">VA</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">VB</span><br>
   
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VC</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VD</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VE</span><br>
-    <span class="Bytebox">00</span><span class="Bytebox2 REGIS">VF</span><br>    
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">VC</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">VD</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">VE</span><br>
+    <span class="Bytebox">00</span><span class="Bytebox2 AREGIS">VF</span><br>    
+</span>
 </span>
 
-<span class="showinside" id="EXTRASHOW">
-    
-    <span class="Bytebox"id="IRSHOWcontent">0000</span><span class="Bytebox2"id="IRSHOW">IR</span><br>
-    <span class="Bytebox"id="PCSHOWcontent">000</span><span class="Bytebox2"id="PCSHOW">PC</span><br>
-    
-    <span class="Bytebox"id="DESHOWcontent">00</span><span class="Bytebox2"id="DESHOW">DELAY</span><br>
-    <span class="Bytebox"id="SOSHOWcontent">00</span><span class="Bytebox2"id="SOSHOW">SOUND</span><br>
-  
 
-</span>
-</div>
 
 </div>
+<div id = "colorchoose">
+    
+    <p>색상 팔레트</p>
+    <div class="colorsel">
+    <input class="colorz" type="color" value="#000000" id="color1" name="color1" /> 
+    <label for="color1">캔버스1 off</label>
+    </div>
+    <div class="colorsel">
+    <input class="colorz" type="color" value="#ffffff" id="color2" name="color2" /> 
+    <label for="color2">캔버스1 on</label>
+    </div>
+    <div class="colorsel">    
+    <input class="colorz" type="color" value="#ff00ff" id="color3" name="color3" /> 
+    <label for="color3">캔버스2 off(xo-chip only)</label>
+    </div>
+    <div class="colorsel">    
+    <input class="colorz" type="color" value="#00ffff" id="color4" name="color4" /> 
+    <label for="color4">캔버스2 on</label>    
+    </div>
+</div>
+
+
+
+</div>
+
+
+
 
 
 </body>

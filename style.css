@@ -27,13 +27,18 @@
   #maincontrol {
     float: left;
     margin-left: 25px;
-    
+    flex-direction: column;
+   
   }  
   .showinside{
     display: inline-block;
-    background-color: lightgray;
+    
     text-align: right;
+    
+  }
+  #supershow{
     border: 1px solid;
+    background-color: lightgray;
   }
   #PCPOINTER{
     font-size: 2em;
@@ -71,7 +76,7 @@
   }
   .regiin{
     display: inline-block;
-  
+    
   }
   #displayandrom {
     float: left;
@@ -86,7 +91,7 @@
 
   }
   #PCSHOW{
-    padding-right: 1em;
+    padding-right: 0.5em;
     background-color: greenyellow;
 
   } 
@@ -99,15 +104,55 @@
     
     background-color: red;
 
-  }     
+  }
+  #PTSHOW{
+    
+    background-color: darkorchid;
+display: none;
+  } 
+  #PLSHOW{
+    
+    background-color: palegoldenrod;
+display: none;
+  }
+  #PTSHOWcontent{
+    
+
+display: none;
+  } 
+  #PLSHOWcontent{
+    
+
+display: none;
+  }                        
+  #SOSHOW{
+    
+    background-color: red;
+
+  }            
   #fREGISHOW{
     
     display: none;
 
   }
+  #AREGISHOW{
+    
+    display: none;
+
+  }  
   .REGIS{
     background-color:deepskyblue;
   }
   .fREGIS{
     background-color: darkseagreen;
+  }
+  .AREGIS{
+    background-color: plum;
+  }  
+  #choosecolor{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-items: center;
+
   }

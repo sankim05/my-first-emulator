@@ -1,6 +1,8 @@
-const RAM = new Uint8Array(4096);
+const RAM = new Uint8Array(65536);
 const REGISTERS = new Uint8Array(16);
 const FREGISTERS = new Uint8Array(16);
+const AUDIOBUFFER = new Uint8Array(16);
+
 const FONTS = [
 0x60, 0x90, 0x90, 0x90, 0x60, //0
 0x20, 0x60, 0xA0, 0x20, 0xF0, //1
@@ -52,6 +54,7 @@ const byteboxes = document.querySelectorAll("#RAMSHOW .Bytebox");
 const bytebox2s = document.querySelectorAll("#RAMSHOW .Bytebox2");
 const rbyteboxes = document.querySelectorAll("#REGISHOW .Bytebox");
 const rfbyteboxes = document.querySelectorAll("#fREGISHOW .Bytebox");
+const rabyteboxes = document.querySelectorAll("#AREGISHOW .Bytebox");
 const buttons = document.getElementsByClassName("keypadbtn");
 let lastTime = 0;    // 마지막 루프가 돌았던 시각 (ms)
 let accTime  = 0;    // 남은 누적 시간(ms)
@@ -66,80 +69,158 @@ var ctx = canvas.getContext("2d");
 ctx.fillStyle = "rgb(0,0,0)";
 ctx.fillRect(0, 0, 384, 192);
 }
-
+let bitplane = 1;
+let pitch = 64;
 const screen = new BigInt64Array(128) //128x64,y는 비트형태로 저장
+const screen2 = new BigInt64Array(128);
+let colorarr = ["rgb(0,0,0)","rgb(255,255,255)","rgb(255,0,255)","rgb(0,255,255)"];
+let textsel = "??";
+
+const waveform = new Uint8Array(16).fill(0);
+const audioContext = new AudioContext();
+let nodge = null;
+async function gee() {
+    await audioContext.audioWorklet.addModule('audioprocess.js');
+ nodeg = new AudioWorkletNode(audioContext, 'xoaudioProcessor', {
+  numberOfOutputs: 1,
+  outputChannelCount: [1],
+  parameterData: {
+    pitch: 64
+  }
+});
+
+
+
+nodeg.port.postMessage({ type: 'wave', data: waveform });
+
+nodeg.connect(audioContext.destination);    
+}
+
+gee();
+
+
+
+
+
+
+
+
+
 
 
 function updatesoundstate(){
 
     if(TIMER_SOUND){
+
+        if(isxo){
+
+
+
+
+            nodeg.port.postMessage({ type: 'wave', data: AUDIOBUFFER });
+
+            nodeg.parameters.get('pitch').setValueAtTime(pitch, audioContext.currentTime);
+            
+
+        }else{
+
+
         audio.currentTime = 0;
         audio.play();
 
+        }
+
+
 
     }else{
-        audio.pause();
+
+        if(isxo){
+
+nodeg.port.postMessage({ type: 'wave', data: waveform });
+    
+  
+
+        }else{
+
+      audio.pause();
+
+        }
     }
 }
 
 function clearscreen(){
     
-    ctx.fillStyle = "rgb(0,0,0)";
+    ctx.fillStyle = colorarr[0];
     ctx.fillRect(0, 0, 384, 192);
 }
 function renderscreen(){
     clearscreen();
-    ctx.fillStyle = "rgb(255,255,255)";
+    ctx.fillStyle = colorarr[1];
     for(let i=0;i<128;i++){
-   
         for(let j=0;j<64;j++){
             if(screen[i] & (1n<<BigInt(j))){
                 ctx.fillRect(i*3, j*3, 3, 3);
-    
-
             }
-            
         }
-
     }
-
-
+    ctx.fillStyle = colorarr[2];
+    for(let i=0;i<128;i++){
+        for(let j=0;j<64;j++){
+            if(screen2[i] & (1n<<BigInt(j))){
+                ctx.fillRect(i*3, j*3, 3, 3);
+            }
+        }
+    }
+    ctx.fillStyle = colorarr[3];
+    for(let i=0;i<128;i++){
+        for(let j=0;j<64;j++){
+            if((screen2[i] & (1n<<BigInt(j)))&&(screen[i] & (1n<<BigInt(j)))){
+                ctx.fillRect(i*3, j*3, 3, 3);
+            }
+        }
+    }
 }
 function showram(){
-    document.getElementById("PCSHOWcontent").textContent = PC.toString(16).padStart(3, "0").toUpperCase();
+    document.getElementById("PCSHOWcontent").textContent = PC.toString(16).padStart(4, "0").toUpperCase();
     for(let i=0;i<=8;i++){
         let ramidx = PC-4+i;
-        if(ramidx<0||ramidx>=4096){
+        if(ramidx<0||ramidx>=65536){
         byteboxes[i].textContent = "00";
-        bytebox2s[i].textContent = "000";
+        bytebox2s[i].textContent = "0000";
         }else{
         byteboxes[i].textContent = RAM[ramidx].toString(16).padStart(2, "0").toUpperCase();
-        bytebox2s[i].textContent = ramidx.toString(16).padStart(3, "0").toUpperCase();
+        bytebox2s[i].textContent = ramidx.toString(16).padStart(4, "0").toUpperCase();
         }
 
     }
 
 }
 
-function showregi(){
+
+
+function showall(){
+    document.getElementById("CurrentACT").textContent = textsel;
+    showram();
+
     for(let i=0;i<16;i++){
         
-
-        rbyteboxes[i].textContent = REGISTERS[i].toString(16).padStart(2, "0").toUpperCase();
-     
-
-    }
-}
-
-function showfregi(){
-    for(let i=0;i<16;i++){
-        
-
+rbyteboxes[i].textContent = REGISTERS[i].toString(16).padStart(2, "0").toUpperCase();
         rfbyteboxes[i].textContent = FREGISTERS[i].toString(16).padStart(2, "0").toUpperCase();
-     
+     rabyteboxes[i].textContent = AUDIOBUFFER[i].toString(16).padStart(2, "0").toUpperCase();
 
     }
+
+    document.getElementById("SOSHOWcontent").textContent = TIMER_SOUND.toString(16).padStart(2, "0").toUpperCase();
+    updatesoundstate();
+    document.getElementById("DESHOWcontent").textContent = TIMER_DELAY.toString(16).padStart(2, "0").toUpperCase();
+    document.getElementById("IRSHOWcontent").textContent = REGI_I.toString(16).padStart(4, "0").toUpperCase();
+    document.getElementById("PLSHOWcontent").textContent = bitplane.toString(16).padStart(2, "0").toUpperCase();
+    document.getElementById("PTSHOWcontent").textContent = pitch.toString(16).padStart(2, "0").toUpperCase();
+
+    renderscreen();
+
 }
+
 
 function clockstep(){
     
@@ -157,10 +238,25 @@ function clockstep(){
         case 0:
             if(I2===0){
             if(I3===0xC){
+                if(bitplane&1){
                 if(hires)for(let i=0;i<128;i++)screen[i] = screen[i] << BigInt(I4);
                 else for(let i=0;i<128;i++)screen[i] = screen[i] << BigInt(I4*2);
-                renderscreen();
-                document.getElementById("CurrentACT").textContent = "아래로  " + I4 + "픽셀 스크롤";
+                }
+                 if(bitplane&2){
+                if(hires)for(let i=0;i<128;i++)screen2[i] = screen2[i] << BigInt(I4);
+                else for(let i=0;i<128;i++)screen2[i] = screen2[i] << BigInt(I4*2);
+                }               
+                textsel= "아래로  " + I4 + "픽셀 스크롤";
+            }else if(I3===0xD){
+                if(bitplane&1){
+                if(hires)for(let i=0;i<128;i++)screen[i] = screen[i] >> BigInt(I4);
+                else for(let i=0;i<128;i++)screen[i] = screen[i] >> BigInt(I4*2);
+                }
+                if(bitplane&2){
+                if(hires)for(let i=0;i<128;i++)screen2[i] = screen2[i] >> BigInt(I4);
+                else for(let i=0;i<128;i++)screen2[i] = screen2[i] >> BigInt(I4*2);
+                }                
+                textsel= "위로  " + I4 + "픽셀 스크롤";
             }
             else if(I3===0xE){
 
@@ -168,21 +264,24 @@ function clockstep(){
 
             
             if(I4===0){
-                for(let i=0;i<128;i++) screen[i] = 0n;
-                clearscreen();
-                document.getElementById("CurrentACT").textContent = "화면 지우기";
+                if(bitplane&1) for(let i=0;i<128;i++) screen[i] = 0n;
+                if(bitplane&2) for(let i=0;i<128;i++) screen2[i] = 0n;
+              
+                textsel= "화면 지우기";
 
             }else if(I4===0xE){
                 
                 PC = STACK.pop();
-                document.getElementById("CurrentACT").textContent = "PC = " + PC.toString(16).toUpperCase() + "로 서브루틴 복귀";
+                textsel= "PC = " + PC.toString(16).toUpperCase() + "로 서브루틴 복귀";
               
             }
             }else if(I3===0xF){
                 switch(I4){
 
                       case 0xB:
-                        if(hires){
+                        if(bitplane&1){
+
+                            if(hires){
                         for(let i=127;i>=4;i--) screen[i] = screen[i-4];
                         for(let i=3;i>=0;i--) screen[i] = 0n;  
 
@@ -194,10 +293,37 @@ function clockstep(){
 
                         }
                     
-                        document.getElementById("CurrentACT").textContent = "오른쪽으로 4픽셀 스크롤";
+
+
+
+                        }
+                        if(bitplane&2){
+
+                            if(hires){
+                        for(let i=127;i>=4;i--) screen2[i] = screen2[i-4];
+                        for(let i=3;i>=0;i--) screen2[i] = 0n;  
+
+                        }else{
+
+
+                        for(let i=127;i>=8;i--) screen2[i] = screen2[i-8];
+                        for(let i=7;i>=0;i--) screen2[i] = 0n;  
+
+                        }
+                    
+
+
+
+                        }
+
+
+                        
+
+                        textsel= "오른쪽으로 4픽셀 스크롤";
 
                         break;
                       case 0xC:
+                        if(bitplane&1){
                         if(hires){
                         for(let i=0;i<124;i++) screen[i] = screen[i+4];
                         for(let i=124;i<128;i++) screen[i] = 0n;
@@ -207,23 +333,36 @@ function clockstep(){
 
                             
                         }
-                        document.getElementById("CurrentACT").textContent = "왼쪽으로 4픽셀 스크롤";
+                    }
+                        if(bitplane&2){
+                        if(hires){
+                        for(let i=0;i<124;i++) screen2[i] = screen2[i+4];
+                        for(let i=124;i<128;i++) screen2[i] = 0n;
+                        }else{
+                        for(let i=0;i<120;i++) screen2[i] = screen2[i+8];
+                        for(let i=120;i<128;i++) screen2[i] = 0n;
+
+                            
+                        }
+                    }
+
+                        textsel= "왼쪽으로 4픽셀 스크롤";
 
                         break;
                        case 0xD:
                         running = false;
                         document.getElementById("pausedtxt").textContent = "현재 정지 중";
-                        document.getElementById("CurrentACT").textContent = "프로그램 탈출";
+                        textsel= "프로그램 탈출";
 
                         break;                                                                          
                      case 0xE:
                         hires = false;
-                        document.getElementById("CurrentACT").textContent = "저화질 그래픽 활성화";
+                        textsel= "저화질 그래픽 활성화";
 
                         break;                   
                     case 0xF:
                         hires = true;
-                        document.getElementById("CurrentACT").textContent = "고화질 그래픽 활성화";
+                        textsel= "고화질 그래픽 활성화";
 
                         break;
 
@@ -245,7 +384,7 @@ function clockstep(){
 
         case 1:
             PC = num;
-            document.getElementById("CurrentACT").textContent = "PC = " + PC.toString(16).toUpperCase() + "로 점프";
+            textsel= "PC = " + PC.toString(16).toUpperCase() + "로 점프";
             PC-=2;
 
             break;
@@ -253,26 +392,72 @@ function clockstep(){
             STACK.push(PC);
             PC = num;
  
-            document.getElementById("CurrentACT").textContent = "PC = " + PC.toString(16).toUpperCase() + "로 서브루틴 호출";
+            textsel= "PC = " + PC.toString(16).toUpperCase() + "로 서브루틴 호출";
             PC-=2;
 
             break;
         case 3:
-            if(REGISTERS[I2]===(num&0xFF)) PC+=2;
+            if(REGISTERS[I2]===(num&0xFF)){
+                  if(isxo){
+                    if(((RAM[PC+2] << 8) | RAM[PC+3])===0xF000) PC+=2;                  
+                  }
+PC+=2;
 
-             document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "가 " + (num&0xFF).toString(16).toUpperCase() + "이면 스킵";
+            } 
+
+             textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "가 " + (num&0xFF).toString(16).toUpperCase() + "이면 스킵";
 
             break;
         case 4:
-            if(REGISTERS[I2]!==(num&0xFF)) PC+=2;
+            if(REGISTERS[I2]!==(num&0xFF)){
+                  if(isxo){
+                    if(((RAM[PC+2] << 8) | RAM[PC+3])===0xF000) PC+=2;                  
+                  }
+PC+=2;
 
-             document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "가 " + (num&0xFF).toString(16).toUpperCase() + "이 아니면 스킵";
+            } 
+
+             textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "가 " + (num&0xFF).toString(16).toUpperCase() + "이 아니면 스킵";
 
             break;
         case 5:
-            if(REGISTERS[I2]===REGISTERS[I3]) PC+=2;
+            if(I4===2){
+                    let range = Math.abs(I2-I3);
+                    let go = I2;
+                    
+                    for(let i = 0;i<=range;i++){
+                        RAM[REGI_I+i] = REGISTERS[go];
+                        if(go<I3)go++;
+                        else go--;
+                    }
+                    
+                    
+                    
+                    textsel= "램에 레지스터 V" + I2.toString(16).toUpperCase() + "부터 레지스터 V" + I3.toString(16).toUpperCase() + "까지 저장";
 
-             document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "가 레지스터 V" + I3.toString(16).toUpperCase() + "이면 스킵";
+            }else if(I4===3){
+                    let range = Math.abs(I2-I3);
+                    let go = I2;
+                    
+                    for(let i = 0;i<=range;i++){
+                        REGISTERS[go] = RAM[REGI_I+i];
+                        if(go<I3)go++;
+                        else go--;
+                    }
+                    
+                    
+                    
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "부터 레지스터 V" + I3.toString(16).toUpperCase() + "까지 램 저장";
+
+            }
+            else if(REGISTERS[I2]===REGISTERS[I3]){
+                  if(isxo){
+                    if(((RAM[PC+2] << 8) | RAM[PC+3])===0xF000) PC+=2;                  
+                  }
+            PC+=2;
+
+                  } 
+             textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "가 레지스터 V" + I3.toString(16).toUpperCase() + "이면 스킵";
 
             break;
 
@@ -281,8 +466,8 @@ function clockstep(){
 
 
             REGISTERS[I2] = 0xFF&num;
-            document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + " = " + REGISTERS[I2].toString(16);
-            showregi();
+            textsel= "레지스터 V" + I2.toString(16).toUpperCase() + " = " + REGISTERS[I2].toString(16);
+          
 
             break;
         case 7:
@@ -290,100 +475,115 @@ function clockstep(){
 
 
             REGISTERS[I2] += 0xFF&num;
-            document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + " += " + (0xFF&num).toString(16);
-            showregi();
+            textsel= "레지스터 V" + I2.toString(16).toUpperCase() + " += " + (0xFF&num).toString(16);
+          
 
             break;
         case 8:
             switch(I4){
                 case 0:
                     REGISTERS[I2] = REGISTERS[I3];
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= 레지스터 V" + I3.toString(16).toUpperCase();
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= 레지스터 V" + I3.toString(16).toUpperCase();
                     break;
 
                 case 1:
                     REGISTERS[I2] = REGISTERS[I2] | REGISTERS[I3];
                     if(!issuper) REGISTERS[0xF] = 0;
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " OR V" + I3.toString(16).toUpperCase();
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " OR V" + I3.toString(16).toUpperCase();
                     break;
                 case 2:
                     REGISTERS[I2] = REGISTERS[I2] & REGISTERS[I3];
                     if(!issuper) REGISTERS[0xF] = 0;
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " AND V" + I3.toString(16).toUpperCase();
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " AND V" + I3.toString(16).toUpperCase();
                     break;
                 case 3:
                     REGISTERS[I2] = REGISTERS[I2] ^ REGISTERS[I3];
                     if(!issuper) REGISTERS[0xF] = 0;
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " XOR V" + I3.toString(16).toUpperCase();
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " XOR V" + I3.toString(16).toUpperCase();
                     break;
                 case 4:
-                    REGISTERS[0xF] = 0;
-                    if(REGISTERS[I2] + REGISTERS[I3]>255) REGISTERS[0xF] = 1;
+                    let res = REGISTERS[I2] + REGISTERS[I3];
                     
-                    REGISTERS[I2] = REGISTERS[I2] + REGISTERS[I3];
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " + V" + I3.toString(16).toUpperCase();
+                    
+                    REGISTERS[I2] = res;
+                    if(res>255)REGISTERS[0xF] = 1;
+                    else REGISTERS[0xF]  = 0;
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " + V" + I3.toString(16).toUpperCase();
                     break;
                 case 5:
-                    REGISTERS[0xF] = 1;
-                    if(REGISTERS[I2] - REGISTERS[I3]<0) REGISTERS[0xF] = 0;
+                    let res2 = REGISTERS[I2] - REGISTERS[I3];
                     
-                    REGISTERS[I2] = REGISTERS[I2] - REGISTERS[I3];
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " - V" + I3.toString(16).toUpperCase();
+                    
+                    REGISTERS[I2] = res2;
+                    if(res2<0)REGISTERS[0xF] = 0;
+                    else REGISTERS[0xF]  = 1;
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " - V" + I3.toString(16).toUpperCase();
                     break;
  
                 case 6:
-                    if(!issuper) REGISTERS[I2] = REGISTERS[I3];
-                    REGISTERS[0xF] = REGISTERS[I2]&1;
+                    if(!issuper||isxo) REGISTERS[I2] = REGISTERS[I3];
+                    let sav = REGISTERS[I2];
                     REGISTERS[I2] = REGISTERS[I2] >> 1;
+                    REGISTERS[0xF] = sav&1;
                     
                     
-                    
-                    if(!issuper) document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " >> 1";
-                    else document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " >> 1";
+                    if(!issuper) textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " >> 1";
+                    else textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " >> 1";
                     break;
                                         
                     
                 case 7:
-                    REGISTERS[0xF] = 1;
-                    if(REGISTERS[I3] - REGISTERS[I2]<0) REGISTERS[0xF] = 0;
+                    let res3 = REGISTERS[I3] - REGISTERS[I2];
                     
-                    REGISTERS[I2] = REGISTERS[I3] - REGISTERS[I2];
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " - V" + I2.toString(16).toUpperCase();
+                    
+                    REGISTERS[I2] = res3;
+                    if(res3<0)REGISTERS[0xF] = 0;
+                    else REGISTERS[0xF]  = 1;
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " - V" + I2.toString(16).toUpperCase();
                     break;
                 case 0xE:
                     
-                    if(!issuper) REGISTERS[I2] = REGISTERS[I3];
-                    REGISTERS[0xF] = Math.floor(REGISTERS[I2]/0x100);
+                    if(!issuper||isxo) REGISTERS[I2] = REGISTERS[I3];
+                    let sav2 = REGISTERS[I2];
+                    
                     REGISTERS[I2] = REGISTERS[I2] << 1;
+                    REGISTERS[0xF] = (sav2&128)/128;
                     
                     
-                    
-                    if(!issuper) document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " << 1";
-                    else document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " << 1";
+                    if(!issuper) textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I3.toString(16).toUpperCase() + " << 1";
+                    else textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= V" + I2.toString(16).toUpperCase() + " << 1";
                     break;                                   
             }
 
-            showregi();
+           
             break;
         case 9:
-            if(REGISTERS[I2]!==REGISTERS[I3]) PC+=2;
+            if(REGISTERS[I2]!==REGISTERS[I3]){
+                  if(isxo){
+                    if(((RAM[PC+2] << 8) | RAM[PC+3])===0xF000) PC+=2;                  
+                  }
+PC+=2;
 
-             document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "가 레지스터 V" + I3.toString(16).toUpperCase() + "이 아니면 스킵";
+
+
+            } 
+
+             textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "가 레지스터 V" + I3.toString(16).toUpperCase() + "이 아니면 스킵";
 
             break;
 
         case 0xA:
             REGI_I = num;
-            document.getElementById("CurrentACT").textContent = "인덱스 레지스터 = " + REGI_I.toString(16).toUpperCase();
-            document.getElementById("IRSHOWcontent").textContent = REGI_I.toString(16).padStart(4, "0").toUpperCase();
+            textsel= "인덱스 레지스터 = " + REGI_I.toString(16).toUpperCase();
+            
 
             break;
         case 0xB:
-            if(issuper){
-            document.getElementById("CurrentACT").textContent = "PC = " + num.toString(16).toUpperCase() + " + " + REGISTERS[I2].toString(16).toUpperCase() + " 로 점프";
+            if(issuper&&!isxo){
+            textsel= "PC = " + num.toString(16).toUpperCase() + " + " + REGISTERS[I2].toString(16).toUpperCase() + " 로 점프";
             PC = num + REGISTERS[I2];
             }else{
-            document.getElementById("CurrentACT").textContent = "PC = " + num.toString(16).toUpperCase() + " + " + REGISTERS[0].toString(16).toUpperCase() + " 로 점프";
+            textsel= "PC = " + num.toString(16).toUpperCase() + " + " + REGISTERS[0].toString(16).toUpperCase() + " 로 점프";
             PC = num + REGISTERS[0];
 
             }
@@ -393,15 +593,15 @@ function clockstep(){
             break;
         case 0xC:
             REGISTERS[I2] = Math.floor(Math.random() * 256) & num
-            document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "= 랜덤";
-            showregi();
+            textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "= 랜덤";
+           
             break;
 
         case 0xD:
             let x,y;
             
-x = REGISTERS[I2];
-y = REGISTERS[I3];
+            x = REGISTERS[I2];
+            y = REGISTERS[I3];
             if(hires){
             x = x%128;
             y = y%64;
@@ -416,10 +616,12 @@ y = REGISTERS[I3];
             }
 
             REGISTERS[0xF] = 0;
-            if(I4===0&&issuper) I4=16;
 
-            if(hires){
-            if(I4==16){
+            if(I4===0&&issuper) I4=16;
+            if(bitplane&1){
+
+          if(hires){
+            if(I4===16){
 
             for(let i=0;i<32;i+=2){
                 let bytegot = RAM[REGI_I+i];
@@ -526,71 +728,234 @@ if(checker) REGISTERS[0xF]++;
             }
 
             }
+                
+            }
+  
+
+            
+            
+            if(bitplane&2){
+let fix = 0;
+if(bitplane&1){
+fix=I4;
+if(I4==16) fix = 32;
+
+} 
+          if(hires){
+            if(I4===16){
+
+            for(let i=0;i<32;i+=2){
+                let bytegot = RAM[REGI_I+i+fix];
+                let bytegot2 = RAM[REGI_I+i+1+fix];
+                let checker = false;
+                let ny = y+i/2;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = x+7-c;
+                      
+                        if(nx<128&&ny<64){
+                            if(screen2[nx]&(1n<<BigInt(ny)))checker = true;
+                            screen2[nx] = screen2[nx]^(1n<<BigInt(ny));                      
+                        }
+                        if(ny>=64&&bytegot)checker = true;
+                        
+
+         
+                }
+                  if(bytegot2&(1<<c)){
+                        let nx = x+15-c;
+                        
+                        if(nx<128&&ny<64){
+                            if(screen2[nx]&(1n<<BigInt(ny)))checker = true;
+                            screen2[nx] = screen2[nx]^(1n<<BigInt(ny));                      
+                        }
+                        if(ny>=64&&bytegot2)checker = true;
+                        
+
+         
+                }
+            }   
+if(checker) REGISTERS[0xF]++;
+
+        }
+            }else{
+
+           
+            for(let i=0;i<I4;i++){
+                let bytegot = RAM[REGI_I+i+fix];
+                let checker = false;
+                  let ny = y+i;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = x+7-c;
+                       
+                        if(nx<128&&ny<64){
+                            if(screen2[nx]&(1n<<BigInt(ny)))checker = true;
+                            screen2[nx] = screen2[nx]^(1n<<BigInt(ny));                      
+                        }
+                        if(ny>=64&&bytegot)checker = true;
+                        
+
+         
+                }
+
+                if(checker) REGISTERS[0xF]++;
+            }    
+            }                
+
+ }
+            }else{
+          
+            for(let i=0;i<I4;i++){
+                let bytegot = RAM[REGI_I+i+fix];
+                let ny = (y+i);
+                if(ny>=32) break;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = (x+7-c);
+                       
+
+
+                
+                        if(nx>=64) break;
+                        
+                            
+                            let fx = nx*2;
+                            let fy = ny*2;
+                            for(let dx = 0;dx<2;dx++){
+                                for(let dy=0;dy<2;dy++){
+
+                            if(screen2[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
+                            screen2[fx+dx] = screen2[fx+dx]^(1n<<BigInt(fy+dy));    
+                            
+
+                                }
+                            }
+
+
+                            
+             
+                        
+                        
+
+         
+                }
+                
+            }    
 
 
 
 
+            }
 
-            renderscreen();
-            if(hires&&I4===16) document.getElementById("CurrentACT").textContent = "X : " + x + " Y : " + y +" 위치에 고급 스프라이트 그리기";
-            else document.getElementById("CurrentACT").textContent = "X : " + x + " Y : " + y +" 위치에 인덱스 레지스터 스프라이트 그리기 N : "+ I4;
-             showregi();
+            }
+                
+            }
+  
+
+
+            
+            if(hires&&I4===16) textsel= "X : " + x + " Y : " + y +" 위치에 고급 스프라이트 그리기";
+            else textsel= "X : " + x + " Y : " + y +" 위치에 인덱스 레지스터 스프라이트 그리기 N : "+ I4;
+           
 
             break;
         case 0xE:
             if((num&0xFF)===0x9E){
-                if(VKEY[REGISTERS[I2]&15])PC+=2;
-                document.getElementById("CurrentACT").textContent = (REGISTERS[I2]&15).toString(16).toUpperCase() +"키가 눌려져 있으면 스킵"; 
+                if(VKEY[REGISTERS[I2]&15]){
+                    
+                  if(isxo){
+                    if(((RAM[PC+2] << 8) | RAM[PC+3])===0xF000) PC+=2;                  
+                  }
+                    
+                    PC+=2;
+
+                }
+                textsel= (REGISTERS[I2]&15).toString(16).toUpperCase() +"키가 눌려져 있으면 스킵"; 
                 
 
             }else if((num&0xFF)===0xA1){
-                if(!VKEY[REGISTERS[I2]&15])PC+=2;
-                document.getElementById("CurrentACT").textContent = (REGISTERS[I2]&15).toString(16).toUpperCase() +"키가 눌려져 있지 않으면 스킵"; 
+                if(!VKEY[REGISTERS[I2]&15]){
+                    if(isxo){
+                        if(((RAM[PC+2] << 8) | RAM[PC+3])===0xF000) PC+=2;
+                    }    
+                    
+                    
+                    PC+=2;
+                }
+                textsel= (REGISTERS[I2]&15).toString(16).toUpperCase() +"키가 눌려져 있지 않으면 스킵"; 
             }
             break;
         case 0xF:
             switch(num&0xFF){
+                case 0x00:
+                    if(I2===0&&isxo){
+                        REGI_I = (RAM[PC+2] << 8) | RAM[PC+3];   
+                        textsel= "인덱스 레지스터 = " + ((RAM[PC+2] << 8) | RAM[PC+3]).toString(16).toUpperCase() + "(long)";
+                       
+                        PC+=2;
+                    }
+                    break;
+                case 0x01:
+                    if(isxo){
+                        bitplane = I2; 
+                        textsel = "캔버스 모드 = " + I2;
+                        
+                        
+                    }
+                    break;
+                case 0x02:
+                    if(isxo&&I2===0){
+                        for(let i=0;i<16;i++){
+                            if(REGI_I+i<0xFFFF) AUDIOBUFFER[i] = RAM[REGI_I+i];
+                        }
+                        textsel = "인덱스 레지스터에서 오디오 패턴 버퍼 가져오기";
+                        
+                        
+                    }
+                    break;                                              
                 case 0x07:
                     REGISTERS[I2] = TIMER_DELAY;
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + " = DELAY 타이머"; 
-                     showregi();
-                    break;
-                case 0x15:
-                    TIMER_DELAY = REGISTERS[I2];
-                    document.getElementById("CurrentACT").textContent = "DELAY 타이머 = 레지스터 V" + I2.toString(16).toUpperCase(); 
-                    document.getElementById("DESHOWcontent").textContent = TIMER_DELAY.toString(16).padStart(2, "0").toUpperCase();
-                    break;
-                case 0x18:
-                    TIMER_SOUND = REGISTERS[I2];
-                    updatesoundstate();
-                    document.getElementById("CurrentACT").textContent = "SOUND 타이머 = 레지스터 V" + I2.toString(16).toUpperCase(); 
-                    document.getElementById("SOSHOWcontent").textContent = TIMER_SOUND.toString(16).padStart(2, "0").toUpperCase();
-
-
-                    break;
-                case 0x1E:
-                    REGI_I = (REGI_I + REGISTERS[I2])&0xFFFF;
-                    if(REGI_I>0xFFF) REGISTERS[0xF]=1;
-                    
-                    document.getElementById("CurrentACT").textContent = "인덱스 레지스터 = 인덱스 레지스터 + 레지스터 V" + I2.toString(16).toUpperCase();
-                    document.getElementById("IRSHOWcontent").textContent = REGI_I.toString(16).padStart(4, "0").toUpperCase();
-
-
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + " = DELAY 타이머"; 
+              
                     break;
                 case 0x0A:
                     secretregidx = I2;
                     paused = true;
                     
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "에 키 입력받을때까지 정지";
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "에 키 입력받을때까지 정지";
                     
 
 
-                    break; 
+                    break;                     
+                case 0x15:
+                    TIMER_DELAY = REGISTERS[I2];
+                    textsel= "DELAY 타이머 = 레지스터 V" + I2.toString(16).toUpperCase(); 
+                    
+                    break;
+                case 0x18:
+                    TIMER_SOUND = REGISTERS[I2];
+                    
+                    textsel= "SOUND 타이머 = 레지스터 V" + I2.toString(16).toUpperCase(); 
+                   
+
+
+                    break;
+                case 0x1E:
+                    REGI_I = (REGI_I + REGISTERS[I2])&0xFFFF;
+                    if(REGI_I>0xFFFF) REGISTERS[0xF]=1;
+                    
+                    textsel= "인덱스 레지스터 = 인덱스 레지스터 + 레지스터 V" + I2.toString(16).toUpperCase();
+                  
+
+
+                    break;
+
                 case 0x29:
                     REGI_I = 0x50 + (REGISTERS[I2]&0xF)*5;
                 
                     
-                    document.getElementById("CurrentACT").textContent = "인덱스 레지스터 = " + (REGISTERS[I2]&0xF).toString(16).toUpperCase() + " 폰트 주소";
+                    textsel= "인덱스 레지스터 = " + (REGISTERS[I2]&0xF).toString(16).toUpperCase() + " 폰트 주소";
                     
 
 
@@ -598,8 +963,8 @@ if(checker) REGISTERS[0xF]++;
                 case 0x30:
                     REGI_I = 0x100 + (REGISTERS[I2]&0xF)*10;
                 
-                    
-                    document.getElementById("CurrentACT").textContent = "인덱스 레지스터 = " + (REGISTERS[I2]&0xF).toString(16).toUpperCase() + " 폰트(대형) 주소";
+                   
+                    textsel= "인덱스 레지스터 = " + (REGISTERS[I2]&0xF).toString(16).toUpperCase() + " 폰트(대형) 주소";
                     
 
 
@@ -609,22 +974,36 @@ if(checker) REGISTERS[0xF]++;
                     RAM[REGI_I+1] = ((REGISTERS[I2]/10)%10);
                     RAM[REGI_I+2] = (REGISTERS[I2]%10);
                     
-                    document.getElementById("CurrentACT").textContent = "램에 레지스터 V" + I2.toString(16).toUpperCase() + " BCD화 한 결과 저장";
+                    textsel= "램에 레지스터 V" + I2.toString(16).toUpperCase() + " BCD화 한 결과 저장";
                     
 
 
                     break;
+                case 0x3A:
+                    if(isxo){
+
+                    pitch = REGISTERS[I2];
+                    
+                    textsel= "PITCH = 레지스터 V" + I2.toString(16).toUpperCase();
+                    
+
+
+                    }
+
+
+
+                    break;                    
                 case 0x55:
 
                     for(let i = 0;i<=I2;i++){
                         RAM[REGI_I] = REGISTERS[i];
                         REGI_I++;
-                        if(!issuper&&REGI_I>0xFFFF) REGI_I = 0;
+                        if((!issuper||isxo)&&REGI_I>0xFFFF) REGI_I = 0;
                     }
-                    if(issuper)REGI_I-=(I2+1);
+                    if(issuper&&!isxo)REGI_I-=(I2+1);
                     
                     
-                    document.getElementById("CurrentACT").textContent = "램에 레지스터 V" + I2.toString(16).toUpperCase() + "까지 저장";
+                    textsel= "램에 레지스터 V" + I2.toString(16).toUpperCase() + "까지 저장";
                     
 
 
@@ -634,12 +1013,12 @@ if(checker) REGISTERS[0xF]++;
                     for(let i = 0;i<=I2;i++){
                         REGISTERS[i] = RAM[REGI_I];
                         REGI_I++;
-                        if(!issuper&&REGI_I>0xFFFF) REGI_I = 0;
+                        if((!issuper||isxo)&&REGI_I>0xFFFF) REGI_I = 0;
                     }
-                    if(issuper)REGI_I-=(I2+1);
+                    if(issuper&&!isxo)REGI_I-=(I2+1);
                     
-                    document.getElementById("CurrentACT").textContent = "레지스터 V" + I2.toString(16).toUpperCase() + "까지 램 저장";
-                     showregi();
+                    textsel= "레지스터 V" + I2.toString(16).toUpperCase() + "까지 램 저장";
+                 
 
 
                     break;
@@ -651,8 +1030,8 @@ if(checker) REGISTERS[0xF]++;
                        
                     }
                     
-                    document.getElementById("CurrentACT").textContent = "플래그 레지스터 V" + I2.toString(16).toUpperCase() + "까지 램 저장";
-                     showfregi();
+                    textsel= "플래그 레지스터 V" + I2.toString(16).toUpperCase() + "까지 램 저장";
+                    
 
 
                     break;                     
@@ -665,23 +1044,24 @@ if(checker) REGISTERS[0xF]++;
                     }
                     
                     
-                    document.getElementById("CurrentACT").textContent = "램에 플래그 레지스터 V" + I2.toString(16).toUpperCase() + "까지 저장";
-                    showfregi();
+                    textsel= "램에 플래그 레지스터 V" + I2.toString(16).toUpperCase() + "까지 저장";
+                    
 
 
                     break;
                       
-
+                default:
+                    break;
             }
             break;
         default:
-            document.getElementById("CurrentACT").textContent = "??";
+            textsel= "??";
             break;
     }
 
-    showram();
+    
     PC+=2;
-    if(PC>=4096) PC = 0;   
+    if(PC>=65536) PC = 0;   
 
     
     
@@ -707,12 +1087,10 @@ function runLoop(now) {
     
     if (TIMER_DELAY > 0) TIMER_DELAY--;
     if (TIMER_SOUND > 0) TIMER_SOUND--;
-    document.getElementById("SOSHOWcontent").textContent = TIMER_SOUND.toString(16).padStart(2, "0").toUpperCase();
-
-    document.getElementById("DESHOWcontent").textContent = TIMER_DELAY.toString(16).padStart(2, "0").toUpperCase();
-
-    if(!TIMER_SOUND) updatesoundstate();
+  
+        showall();
     accTimer -= msPerTimer;
+    
   }  
   while (accTime >= msPerTick) {
     if(!paused) clockstep();
@@ -749,28 +1127,27 @@ function emureset(){
     lastTime = 0;
     accTime  = 0; 
     accTimer = 0;
+    bitplane = 1;
+    pitch = 64;
     for(let i=0;i<128;i++) screen[i] = 0n;
+    for(let i=0;i<128;i++) screen2[i] = 0n;
     paused = false;
     hires = false;
-    for(let i=0;i<4096;i++) RAM[i]=0;
+    for(let i=0;i<65536;i++) RAM[i]=0;
     for(let i=0;i<16;i++) REGISTERS[i]=0;
     for(let i=0;i<16;i++) FREGISTERS[i]=0;
+    for(let i=0;i<16;i++) AUDIOBUFFER[i]=0;
     PC = 0x200;
     REGI_I = 0;
     STACK = [];
     TIMER_DELAY = 0;
     TIMER_SOUND = 0;
+    textsel = "??";
     document.getElementById("pausedtxt").textContent = "현재 정지 중"; 
     clearscreen();
     loadRom();
-    document.getElementById("CurrentACT").textContent = "??";
-    showram();
-    showregi();
-    showfregi();
-    document.getElementById("SOSHOWcontent").textContent = TIMER_SOUND.toString(16).padStart(2, "0").toUpperCase();
+    showall();
 
-    document.getElementById("DESHOWcontent").textContent = TIMER_DELAY.toString(16).padStart(2, "0").toUpperCase();
-    document.getElementById("IRSHOWcontent").textContent = REGI_I.toString(16).padStart(4, "0").toUpperCase();
 }
 
 
@@ -784,7 +1161,10 @@ function emureset(){
 document.getElementById("EmuStep").addEventListener("click",function(){
 
 
-    if (!running) clockstep();
+    if (!running){
+clockstep();
+        showall();
+    } 
 
 
 
@@ -799,13 +1179,14 @@ document.getElementById("EmuRun").addEventListener("click",function(){
        lastTime = 0;
   accTime  = 0;
   accTimer = 0;
+  showall();
   requestAnimationFrame(runLoop);
     
 });
 document.getElementById("EmuPause").addEventListener("click",function(){
     running = false;
     document.getElementById("pausedtxt").textContent = "현재 정지 중";
-    
+    showall();
 });
 document.getElementById("Speeddown").addEventListener("click",function(){
     
@@ -815,7 +1196,7 @@ document.getElementById("Speeddown").addEventListener("click",function(){
 });
 document.getElementById("Speedup").addEventListener("click",function(){
     
-    if(hz<4096)hz = hz << 1;
+    if(hz<4000000)hz = hz << 1;
     document.getElementById("Speedshow").textContent = hz + "hz";
 
 });
@@ -823,19 +1204,46 @@ document.getElementById("super").addEventListener ("click",function(newvalue){
 
 
     issuper = newvalue.target.checked;
-   if(issuper)document.getElementById("fREGISHOW").style.display = 'inline-block';
+    if(issuper)document.getElementById("fREGISHOW").style.display = 'inline-block';
         
-   else document.getElementById("fREGISHOW").style.display = 'none';
+    else{
+        document.getElementById("fREGISHOW").style.display = 'none';
+        bitplane = 1;
+        isxo = false;
+        document.getElementById("xo").checked = false;
+            document.getElementById("PLSHOWcontent").style.display = 'none';
+document.getElementById("PLSHOW").style.display = 'none';
+        document.getElementById("PTSHOWcontent").style.display = 'none';
+document.getElementById("PTSHOW").style.display = 'none';    
+document.getElementById("AREGISHOW").style.display = 'none';
+    } 
 
 });
 document.getElementById("xo").addEventListener ("click",function(newvalue){
 
 
     isxo = newvalue.target.checked;
-    if(isxo) issuper = true;
-    if(issuper)document.getElementById("fREGISHOW").style.display = 'inline-block';
-    
+    if(isxo){
+        issuper = true;
+        document.getElementById("AREGISHOW").style.display = 'inline-block';
+        document.getElementById("PLSHOWcontent").style.display = 'inline-block';
+document.getElementById("PLSHOW").style.display = 'inline-block';
+        document.getElementById("PTSHOWcontent").style.display = 'inline-block';
+document.getElementById("PTSHOW").style.display = 'inline-block';
+    } 
+    else{
+bitplane = 1;
+        document.getElementById("PLSHOWcontent").style.display = 'none';
+document.getElementById("PLSHOW").style.display = 'none';
+        document.getElementById("PTSHOWcontent").style.display = 'none';
+document.getElementById("PTSHOW").style.display = 'none';
+document.getElementById("AREGISHOW").style.display = 'none';
 
+    } 
+    if(issuper){
+        document.getElementById("fREGISHOW").style.display = 'inline-block';
+        document.getElementById("super").checked = true;
+    }
 });
 document.getElementById("romtextarea").addEventListener("input",loadRom);
 
@@ -887,6 +1295,22 @@ document.querySelectorAll(".keypadbtn").forEach(btn => {
 
 
 });
+document.querySelectorAll(".colorz").forEach(iput => {
+  
 
+  
+  iput.addEventListener("change", (E) => {
+    colorarr[parseInt(iput.id.match(/\d/g))-1] = E.target.value;
+    renderscreen();
+
+
+
+  });
+
+  
+
+
+
+});
 
 emureset();
