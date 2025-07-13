@@ -79,25 +79,7 @@ let textsel = "??";
 const waveform = new Uint8Array(16).fill(0);
 let audioContext = null;
 let nodge = null;
-async function gee() {
-    audioContext = new AudioContext();
-    await audioContext.audioWorklet.addModule('./audioprocess.js');
- nodeg = new AudioWorkletNode(audioContext, 'xoaudioProcessor', {
-  numberOfOutputs: 1,
-  outputChannelCount: [1],
-  parameterData: {
-    pitch: 64
-  }
-});
 
-
-
-nodeg.port.postMessage({ type: 'wave', data: waveform });
-
-nodeg.connect(audioContext.destination);    
-}
-
-gee();
 
 
 
@@ -1172,7 +1154,33 @@ clockstep();
 });
 document.getElementById("EmuReset").addEventListener("click",emureset);
 document.getElementById("EmuRun").addEventListener("click",async function(){
-    if(audioContext == null) await gee();
+    if(audioContext == null){
+
+    audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule('./audioprocess.js');
+ nodeg = new AudioWorkletNode(audioContext, 'xoaudioProcessor', {
+  numberOfOutputs: 1,
+  outputChannelCount: [1],
+  parameterData: {
+    pitch: 64
+  }
+});
+
+
+
+nodeg.port.postMessage({ type: 'wave', data: waveform });
+
+nodeg.connect(audioContext.destination);    
+
+
+
+
+
+
+
+
+
+    }
     if(running) return;
     audio.play();
     audio.pause();
