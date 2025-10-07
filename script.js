@@ -1482,7 +1482,7 @@ function tharg(arraybfer){
     const array2 = new Uint8Array(arraybfer);
     let finstring = "";
     for(let i=0;i<array2.length;i++){
-        finstring = finstring + array2[i].toString(16) + " ";
+        finstring = finstring + array2[i].toString(16).padStart(2, "0").toUpperCase() + " ";
 
     }
     document.getElementById("romtextarea").value = finstring;
@@ -1506,7 +1506,7 @@ document.getElementById("userUpload").addEventListener('change',function(event){
 
 document.getElementById("romselect").addEventListener('change', function() {
   const Pathz = this.value;
-  if(Pathz === "none") {
+  if(Pathz === "null") {
     document.getElementById("romtextarea").value = "";
     emureset();
     return;
