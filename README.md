@@ -35,9 +35,9 @@ Also including original **8o File** so you can watch its inside.
 [Octo IDE](https://github.com/JohnEarnest/Octo)로 만들어졌고 
 충분히 씹고뜯고맛보고즐기고 하실수 있게 원본 **8o 파일**도 첨부합니다.
 
-<video controls width="500">
-  <source src="./readmestuffs/huhvideo.mp4" type="video/mp4">
-</video>
+
+![](./readmestuffs/huhvideo.gif "peak gameplay")
+[Click here for full video with audio](https://www.youtube.com/watch?v=5V7ePbc12g4)
 
 Move left and right, and jump pressing 7,9,5 in keypad (wasd in your keyboard).
 
