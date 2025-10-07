@@ -39,9 +39,18 @@
 <button type="button" class = "inliner" id = "EmuReset"> 리셋 </button>
 
 </div>
-<br>
 
 
+롬 종류
+  <select id="romselect" >
+    <option value="null">선택 안함</option>
+    <option value="./testrom/IBM Logo.ch8">IBM 로고</option>
+    <option value="./testrom/Adventure_Of_Thorg(Enable Both SUPER-CHIP And XO-CHIP).ch8">Adventure_Of_Thorg(Extension을 전부 활성화하세요)</option>
+    <option value="upload">업로드된 롬</option>
+  </select>
+  <br>
+롬 업로드하기
+<input type="file" id="userUpload">
 <div id = "ROMINPUT" >
         <textarea id="romtextarea" placeholder="여기에 HEX 롬을 붙여넣으세요"></textarea>
 </div>
@@ -209,11 +218,11 @@
     </div>
     <div class="colorsel">    
     <input class="colorz" type="color" value="#ff00ff" id="color3" name="color3" /> 
-    <label for="color3">캔버스2 off(xo-chip only)</label>
+    <label for="color3">캔버스1 off, 캔버스2 on(xo-chip only)</label>
     </div>
     <div class="colorsel">    
     <input class="colorz" type="color" value="#00ffff" id="color4" name="color4" /> 
-    <label for="color4">캔버스2 on</label>    
+    <label for="color4">캔버스1 on, 캔버스2 on</label>    
     </div>
 </div>
 

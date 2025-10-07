@@ -33,7 +33,7 @@ class XOaudioProcessor extends AudioWorkletProcessor {
     const output = outputs[0][0];
     const pitch = parameters.pitch[0];
 
-    const playbackRate = 500 * (2**((pitch-64)/48));
+    const playbackRate = 500 * Math.pow(2,((pitch-64)/48));
     const increment = playbackRate / sampleRate;
 
     for (let i = 0; i < output.length; i++) {

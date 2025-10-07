@@ -99,11 +99,15 @@ function updatesoundstate(){
 
 
 
-
+           
             nodeg.port.postMessage({ type: 'wave', data: AUDIOBUFFER });
 
             nodeg.parameters.get('pitch').setValueAtTime(pitch, audioContext.currentTime);
             
+
+
+            
+
 
         }else{
 
@@ -339,11 +343,25 @@ function clockstep(){
 
                         break;                                                                          
                      case 0xE:
+                        if(isxo){
+
+                if(bitplane&1) for(let i=0;i<128;i++) screen[i] = 0n;
+                if(bitplane&2) for(let i=0;i<128;i++) screen2[i] = 0n;
+
+
+                        }
                         hires = false;
                         textsel= "저화질 그래픽 활성화";
 
                         break;                   
                     case 0xF:
+                        if(isxo){
+
+                if(bitplane&1) for(let i=0;i<128;i++) screen[i] = 0n;
+                if(bitplane&2) for(let i=0;i<128;i++) screen2[i] = 0n;
+
+
+                        }                       
                         hires = true;
                         textsel= "고화질 그래픽 활성화";
 
@@ -667,7 +685,65 @@ if(checker) REGISTERS[0xF]++;
 
  }
             }else{
-          
+          if(I4===16&&isxo){
+            for(let i=0;i<32;i+=2){
+                let bytegot = RAM[REGI_I+i];
+                let bytegot2 = RAM[REGI_I+i+1];
+                let ny = y+i/2;
+                if(ny>=32) break;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = (x+7-c);
+                       
+
+
+                
+                        if(nx>=64) break;
+                        
+                            
+                            let fx = nx*2;
+                            let fy = ny*2;
+                            for(let dx = 0;dx<2;dx++){
+                                for(let dy=0;dy<2;dy++){
+
+                            if(screen[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
+                            screen[fx+dx] = screen[fx+dx]^(1n<<BigInt(fy+dy));    
+
+                                }
+                            }
+
+         
+                }
+                    if(bytegot2&(1<<c)){
+                        let nx = (x+15-c);
+                       
+
+
+                
+                        if(nx>=64) break;
+                        
+                            
+                            let fx = nx*2;
+                            let fy = ny*2;
+                            for(let dx = 0;dx<2;dx++){
+                                for(let dy=0;dy<2;dy++){
+
+                            if(screen[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
+                            screen[fx+dx] = screen[fx+dx]^(1n<<BigInt(fy+dy));    
+
+                                }
+                            }
+
+         
+                }                
+            }    
+
+            }
+
+
+
+          }else{
+
             for(let i=0;i<I4;i++){
                 let bytegot = RAM[REGI_I+i];
                 let ny = (y+i);
@@ -689,26 +765,19 @@ if(checker) REGISTERS[0xF]++;
 
                             if(screen[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
                             screen[fx+dx] = screen[fx+dx]^(1n<<BigInt(fy+dy));    
-                            
 
                                 }
                             }
-
-
-                            
-             
-                        
-                        
 
          
                 }
                 
             }    
 
-
-
-
             }
+
+          }
+
 
             }
                 
@@ -721,7 +790,9 @@ if(checker) REGISTERS[0xF]++;
 let fix = 0;
 if(bitplane&1){
 fix=I4;
-if(I4==16) fix = 32;
+if(I4===16){
+    if(hires||isxo)fix = 32;
+} 
 
 } 
           if(hires){
@@ -788,7 +859,80 @@ if(checker) REGISTERS[0xF]++;
 
  }
             }else{
-          
+          if(I4===16&&isxo){
+            for(let i=0;i<32;i+=2){
+                let bytegot = RAM[REGI_I+i+fix];
+                let bytegot2 = RAM[REGI_I+i+fix+1];                
+                let ny = y+i/2;
+                if(ny>=32) break;
+                for(let c=7;c>=0;c--){
+                    if(bytegot&(1<<c)){
+                        let nx = (x+7-c);
+                       
+
+
+                
+                        if(nx>=64) break;
+                        
+                            
+                            let fx = nx*2;
+                            let fy = ny*2;
+                            for(let dx = 0;dx<2;dx++){
+                                for(let dy=0;dy<2;dy++){
+
+                            if(screen2[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
+                            screen2[fx+dx] = screen2[fx+dx]^(1n<<BigInt(fy+dy));    
+                            
+
+                                }
+                            }
+
+
+                            
+             
+                        
+                        
+
+         
+                }
+                    if(bytegot2&(1<<c)){
+                        let nx = (x+15-c);
+                       
+
+
+                
+                        if(nx>=64) break;
+                        
+                            
+                            let fx = nx*2;
+                            let fy = ny*2;
+                            for(let dx = 0;dx<2;dx++){
+                                for(let dy=0;dy<2;dy++){
+
+                            if(screen2[fx+dx]&(1n<<BigInt(fy+dy)))REGISTERS[0xF] = 1;
+                            screen2[fx+dx] = screen2[fx+dx]^(1n<<BigInt(fy+dy));    
+                            
+
+                                }
+                            }
+
+
+                            
+             
+                        
+                        
+
+         
+                }                
+            }    
+
+
+
+
+            }
+
+          }else{
+
             for(let i=0;i<I4;i++){
                 let bytegot = RAM[REGI_I+i+fix];
                 let ny = (y+i);
@@ -830,6 +974,12 @@ if(checker) REGISTERS[0xF]++;
 
 
             }
+
+
+
+
+          }
+
 
             }
                 
@@ -892,6 +1042,7 @@ if(checker) REGISTERS[0xF]++;
                         for(let i=0;i<16;i++){
                             if(REGI_I+i<0xFFFF) AUDIOBUFFER[i] = RAM[REGI_I+i];
                         }
+                       
                         textsel = "인덱스 레지스터에서 오디오 패턴 버퍼 가져오기";
                         
                         
@@ -1116,6 +1267,7 @@ function emureset(){
     for(let i=0;i<128;i++) screen2[i] = 0n;
     paused = false;
     hires = false;
+    
     for(let i=0;i<65536;i++) RAM[i]=0;
     for(let i=0;i<16;i++) REGISTERS[i]=0;
     for(let i=0;i<16;i++) FREGISTERS[i]=0;
@@ -1322,5 +1474,67 @@ document.querySelectorAll(".colorz").forEach(iput => {
 
 
 });
+
+let uploadedfile = null;
+const reader = new FileReader();
+
+function tharg(arraybfer){
+    const array2 = new Uint8Array(arraybfer);
+    let finstring = "";
+    for(let i=0;i<array2.length;i++){
+        finstring = finstring + array2[i].toString(16) + " ";
+
+    }
+
+
+}
+reader.onload = function(e) {
+    const arrayBufferz = e.target.result; 
+    tharg(arrayBufferz); 
+};
+
+document.getElementById("userUpload").addEventListener('change',function(event){
+    if(event.target.files.length > 0){
+        uploadedfile = event.target.files[0];
+reader.readAsArrayBuffer(uploadedfile); 
+    }else{
+        uploadedfile = null;
+    }
+    document.getElementById("romselect").value = "upload";
+});
+
+document.getElementById("romselect").addEventListener('change', function() {
+  const Pathz = this.value;
+  if(Pathz === "none") {
+    document.getElementById("romtextarea").value = "";
+    emureset();
+    return;
+  }
+  else if(Pathz == "upload"){
+    if(document.getElementById("userUpload").files[0]===undefined){
+    document.getElementById("romtextarea").value = "";
+    emureset();
+    return;        
+    }else{
+
+
+
+   reader.readAsArrayBuffer(uploadedfile);
+    }
+
+  }else{
+
+  fetch(Pathz)
+    .then(response => {
+      return response.arrayBuffer();
+    })
+    .then(arrayBuffer => {
+      tharg(arrayBuffer);
+
+    })
+  }
+});
+
+
 
 emureset();
