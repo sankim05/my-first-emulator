@@ -35,7 +35,9 @@ Also including original **8o File** so you can watch its inside.
 [Octo IDE](https://github.com/JohnEarnest/Octo)로 만들어졌고 
 충분히 씹고뜯고맛보고즐기고 하실수 있게 원본 **8o 파일**도 첨부합니다.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/5V7ePbc12g4?si=V5V5mwW3XMrfWvXb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<video controls width="500">
+  <source src="./readmestuffs/huhvideo.mp4" type="video/mp4">
+</video>
 
 Move left and right, and jump pressing 7,9,5 in keypad (wasd in your keyboard).
 
