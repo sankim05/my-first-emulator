@@ -1506,7 +1506,7 @@ document.getElementById("userUpload").addEventListener('change',function(event){
 
 document.getElementById("romselect").addEventListener('change', function() {
   const Pathz = this.value;
-  if(Pathz === "null") {
+  if(Pathz === "nul") {
     document.getElementById("romtextarea").value = "";
     emureset();
     return;
