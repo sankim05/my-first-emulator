@@ -1485,7 +1485,8 @@ function tharg(arraybfer){
         finstring = finstring + array2[i].toString(16) + " ";
 
     }
-
+    document.getElementById("romtextarea").value = finstring;
+    emureset();
 
 }
 reader.onload = function(e) {
@@ -1496,7 +1497,7 @@ reader.onload = function(e) {
 document.getElementById("userUpload").addEventListener('change',function(event){
     if(event.target.files.length > 0){
         uploadedfile = event.target.files[0];
-reader.readAsArrayBuffer(uploadedfile); 
+        reader.readAsArrayBuffer(uploadedfile); 
     }else{
         uploadedfile = null;
     }
