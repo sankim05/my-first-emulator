@@ -990,7 +990,7 @@ if(checker) REGISTERS[0xF]++;
             
             if(hires&&I4===16) textsel= "X : " + x + " Y : " + y +" 위치에 고급 스프라이트 그리기";
             else textsel= "X : " + x + " Y : " + y +" 위치에 인덱스 레지스터 스프라이트 그리기 N : "+ I4;
-           
+            if(isxo&&REGISTERS[0xF]>1)REGISTERS[0xF] = 1;
 
             break;
         case 0xE:
@@ -1077,7 +1077,7 @@ if(checker) REGISTERS[0xF]++;
                     break;
                 case 0x1E:
                     REGI_I = (REGI_I + REGISTERS[I2])&0xFFFF;
-                    if(REGI_I>0xFFFF) REGISTERS[0xF]=1;
+                   
                     
                     textsel= "인덱스 레지스터 = 인덱스 레지스터 + 레지스터 V" + I2.toString(16).toUpperCase();
                   
@@ -1421,17 +1421,17 @@ document.addEventListener("keydown", (e) => {
  
   if (e.key in keyMap) {
     VKEY[keyMap[e.key]] = true;
-    if(paused){
-        REGISTERS[secretregidx] = keyMap[e.key];
-        paused = false;
-    } 
+
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.key in keyMap) {
     VKEY[keyMap[e.key]] = false;
-
+    if(paused){
+        REGISTERS[secretregidx] = keyMap[e.key];
+        paused = false;
+    } 
   }
 });
 
